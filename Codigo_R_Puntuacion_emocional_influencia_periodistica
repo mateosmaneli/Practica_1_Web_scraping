@@ -1,30 +1,30 @@
 ---
-title: "Pr·ctica 1 Web scraping"
+title: "Pr√°ctica 1 Web scraping"
 author: "Manel Mateos Canal"
 date: "28 de octubre de 2019"
 output: html_document
 ---
 
 ******
-# Pr·ctica WEB SCRAPPING - PuntuaciÛn emocional/sentimental de influencia periodÌstica
+# Pr√°ctica WEB SCRAPPING - Puntuaci√≥n emocional/sentimental de influencia period√≠stica
 ******
-En esta pr·ctica, se elabora un caso pr·ctico orientado a aprender a identificar los datos
-relevantes por un proyecto analÌtico y usar las herramientas de extracciÛn de datos.
+En esta pr√°ctica, se elabora un caso pr√°ctico orientado a aprender a identificar los datos
+relevantes por un proyecto anal√≠tico y usar las herramientas de extracci√≥n de datos.
 
 ******
-## 01 - InstalaciÛn y carga de librerÌas
+## 01 - Instalaci√≥n y carga de librer√≠as
 ******
 ```{r,eval=TRUE,echo=TRUE}
-# Necesitamos cargar las siguientes librerÌas:
+# Necesitamos cargar las siguientes librer√≠as:
 library(purrr)
 library(rvest)
 library(xlsx)
 ```
 
 ******
-## 02 - ExtracciÛn de datos
+## 02 - Extracci√≥n de datos
 ******
-En este apartado, extraeremos los datos del diario digital NY TIMES, en concreto, obtendremos todos los titulares de noticias publicados en el dÌa 10/11/2019:
+En este apartado, extraeremos los datos del diario digital NY TIMES, en concreto, obtendremos todos los titulares de noticias publicados en el d√≠a 10/11/2019:
 
 ```{r,eval=TRUE,echo=TRUE}
 # Primero, marcamos la url de donde extraeremos los titulares:
@@ -33,7 +33,7 @@ url_diario <- html("https://www.nytimes.com/section/todayspaper?redirect_uri=htt
 # Luego, marcamos la clase en HTML donde se ubica el contenido de texto de los titulares:
 titulares <- html_nodes(url_diario,".e1f68otr0")
 
-# Finalmente, aplicamos la funciÛn de extracciÛn de datos sobre las anteriores marcas:
+# Finalmente, aplicamos la funci√≥n de extracci√≥n de datos sobre las anteriores marcas:
 datos_titulares <- data.frame(html_text(titulares))
 
 # Visualizamos los resultados obtenidos:
@@ -41,22 +41,22 @@ head(datos_titulares)
 ```
 
 ******
-## 03 - ExportaciÛn de resultados
+## 03 - Exportaci√≥n de resultados
 ******
 Una vez se han extraidos los datos de texto de cada uno de los titulares, generamos un archivo excel por tal de exportarlos:
 
 ```{r,eval=TRUE,echo=TRUE}
-# Aplicamos la funciÛn "write" para generar un archivo ".xlsx" y almacenarlo localmente:
+# Aplicamos la funci√≥n "write" para generar un archivo ".xlsx" y almacenarlo localmente:
 write.xlsx(datos_titulares, "C:/Users/Usuari/Desktop/datos-titulares.xlsx")         
 ```
 
 ******
 ## 04 - Limpieza de datos
 ******
-En este cuarto punto, realizamos una limpieza de los textos con el fin de adecuarlos a los datos del diccionario emocional/sentimental. Si no se adecuan los textos, el cruce de datos no ser· v·lido. Necesitamos eliminar los signos de puntuaciÛn y adecuar todo el texto en min˙sculas.
+En este cuarto punto, realizamos una limpieza de los textos con el fin de adecuarlos a los datos del diccionario emocional/sentimental. Si no se adecuan los textos, el cruce de datos no ser√° v√°lido. Necesitamos eliminar los signos de puntuaci√≥n y adecuar todo el texto en min√∫sculas.
 
 ```{r,eval=TRUE,echo=TRUE}
-# Creamos una funciÛn de limpieza de texto:
+# Creamos una funci√≥n de limpieza de texto:
 Clean_String <- function(string){
     # Lowercase
     temp <- tolower(string)
@@ -100,7 +100,7 @@ Keano Is N.Y.'s Most Famous and Mysterious Subway Psychic. I Found Her.
 Are Parks for Strolling or Sports? In New York, It's Complicated.
 How This Top Jazz Drummer Spends His Sundays
 Emma Thompson Can't Live Without Hannah Gadsby and Potato Scones
-…douard Louis Would Like to Talk About Theater Now
+√âdouard Louis Would Like to Talk About Theater Now
 'Riverdance' Was Years Ago. Colin Dunne Makes Quiet Music Now.
 Natural Gas or Renewables? New Orleans Choice Is Shadowed by Katrina
 Vomiting at Work Doesn't Mean You're Bad at Your Job
@@ -143,7 +143,7 @@ head(datos_limpios)
 ******
 ## 05 - Importar diccionario emocional/sentimental
 ******
-A continuaciÛn, importamos el diccionario emocional/sentimental de 2.470 palabras valoradas por la Universidad de Notre Dame donde las puntua del -5 al 5 seg˙n su efecto en el comportamiento humano.
+A continuaci√≥n, importamos el diccionario emocional/sentimental de 2.470 palabras valoradas por la Universidad de Notre Dame donde las puntua del -5 al 5 seg√∫n su efecto en el comportamiento humano.
 
 ```{r,eval=TRUE,echo=TRUE}
 # Importamos el dateset del diccionario emociona/sentimental:
@@ -157,10 +157,10 @@ summary(diccionario_emocional)
 ******
 ## 06 - Inner Join de las palabras
 ******
-Procesamos los datos obtenidos anteriormente realizando una inner join mediante las palabras. De este modo, obtendremos las puntuaciones emocionales/sentimentales de cada palabra que conforman el conjunto de titulares del diario NY TIMES durante el dÌa 10/11/2019: 
+Procesamos los datos obtenidos anteriormente realizando una inner join mediante las palabras. De este modo, obtendremos las puntuaciones emocionales/sentimentales de cada palabra que conforman el conjunto de titulares del diario NY TIMES durante el d√≠a 10/11/2019: 
 
 ```{r,eval=TRUE,echo=TRUE}
-# Aplicamos la funciÛn "merge" para hacer el inner join:
+# Aplicamos la funci√≥n "merge" para hacer el inner join:
 inner_join <-merge(x=datos_limpios,y=diccionario_emocional,by="Word")
 
 #Visualizamos los resultados resumen:
@@ -174,7 +174,7 @@ summary(inner_join)
 Y finalmente, realizamos un sumatorio de todas las puntuaciones recibidas de las palabras que conforman los titulares de todas las noticias:
 
 ```{r,eval=TRUE,echo=TRUE}
-# Aplicamos la funciÛn "sum" para sumar las puntuaciones:
+# Aplicamos la funci√≥n "sum" para sumar las puntuaciones:
 resultado_hoy <-sum(inner_join$Puntuacion)
 resultado_hoy
 ```
