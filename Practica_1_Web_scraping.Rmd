@@ -1,0 +1,196 @@
+---
+title: "Práctica 1 Web scraping"
+author: "Manel Mateos Canal"
+date: "28 de octubre de 2019"
+output: html_document
+---
+
+******
+# Práctica WEB SCRAPPING - Puntuación emocional/sentimental de influencia periodística
+******
+En esta práctica, se elabora un caso práctico orientado a aprender a identificar los datos
+relevantes por un proyecto analítico y usar las herramientas de extracción de datos.
+
+******
+## 01 - Instalación y carga de librerías
+******
+```{r,eval=TRUE,echo=TRUE}
+# Necesitamos cargar las siguientes librerías:
+library(purrr)
+library(rvest)
+library(xlsx)
+```
+
+******
+## 02 - Extracción de datos
+******
+En este apartado, extraeremos los datos del diario digital NY TIMES, en concreto, obtendremos todos los titulares de noticias publicados en el día 10/11/2019:
+
+```{r,eval=TRUE,echo=TRUE}
+# Primero, marcamos la url de donde extraeremos los titulares:
+url_diario <- html("https://www.nytimes.com/section/todayspaper?redirect_uri=https%3A%2F%2Fwww.nytimes.com%2F")
+
+# Luego, marcamos la clase en HTML donde se ubica el contenido de texto de los titulares:
+titulares <- html_nodes(url_diario,".e1f68otr0")
+
+# Finalmente, aplicamos la función de extracción de datos sobre las anteriores marcas:
+datos_titulares <- data.frame(html_text(titulares))
+
+# Visualizamos los resultados obtenidos:
+head(datos_titulares)
+```
+
+******
+## 03 - Exportación de resultados
+******
+Una vez se han extraidos los datos de texto de cada uno de los titulares, generamos un archivo excel por tal de exportarlos:
+
+```{r,eval=TRUE,echo=TRUE}
+# Aplicamos la función "write" para generar un archivo ".xlsx" y almacenarlo localmente:
+write.xlsx(datos_titulares, "C:/Users/Usuari/Desktop/datos-titulares.xlsx")         
+```
+
+******
+## 04 - Limpieza de datos
+******
+En este cuarto punto, realizamos una limpieza de los textos con el fin de adecuarlos a los datos del diccionario emocional/sentimental. Si no se adecuan los textos, el cruce de datos no será válido. Necesitamos eliminar los signos de puntuación y adecuar todo el texto en minúsculas.
+
+```{r,eval=TRUE,echo=TRUE}
+# Creamos una función de limpieza de texto:
+Clean_String <- function(string){
+    # Lowercase
+    temp <- tolower(string)
+    # Remove everything that is not a number or letter (may want to keep more 
+    # stuff in your actual analyses). 
+    temp <- stringr::str_replace_all(temp,"[^a-zA-Z\\s]", " ")
+    # Shrink down to just one white space
+    temp <- stringr::str_replace_all(temp,"[\\s]+", " ")
+    # Split it
+    temp <- stringr::str_split(temp, " ")[[1]]
+    # Get rid of trailing "" if necessary
+    indexes <- which(temp == "")
+    if(length(indexes) > 0){
+      temp <- temp[-indexes]
+    } 
+    return(temp)
+}
+
+datos2 <- "Inside Football's Campaign to Save the Game
+French Baguettes From a Vending Machine? 'What a Tragedy.'
+Bolivian Leader Clings to Power as Police Join Protesters
+The Hidden Cost of Gold: Birth Defects and Brain Damage
+Why Pete Buttigieg Annoys His Democratic Rivals
+'A Proud Day': Ex-Felons Clear Final Hurdle to Vote
+L.S.U. Survives Alabama's Second-Half Push for a Big Win
+Knowing Paris by Its Bridges
+The Pep Effect
+Yoga Is Finally Facing Consent and Unwanted Touch
+Philip Glass Is Too Busy to Care About Legacy
+The Restrained Genius of a Joe Pesci Performance
+Surviving Droughts, Tornadoes and Racism
+French Baguettes From a Vending Machine? 'What a Tragedy.'
+Iraq Cracks Down on Protests as Prime Minister Gains Support
+For First Time, Iran Says Case Is Open on Missing C.I.A. Consultant
+Why Pete Buttigieg Annoys His Democratic Rivals
+After Homelessness, a Single Mother Strives to Provide for Her Family
+Examining Conflicting Claims About 'Medicare for All'
+Gillian Jagger, Sculptor Whose Medium Was Nature, Dies at 88
+Peter Collier, Author and Leading Conservative Voice, Dies at 80
+Keano Is N.Y.'s Most Famous and Mysterious Subway Psychic. I Found Her.
+Are Parks for Strolling or Sports? In New York, It's Complicated.
+How This Top Jazz Drummer Spends His Sundays
+Emma Thompson Can't Live Without Hannah Gadsby and Potato Scones
+Édouard Louis Would Like to Talk About Theater Now
+'Riverdance' Was Years Ago. Colin Dunne Makes Quiet Music Now.
+Natural Gas or Renewables? New Orleans Choice Is Shadowed by Katrina
+Vomiting at Work Doesn't Mean You're Bad at Your Job
+If People Were Paid by Ability, Inequality Would Plummet
+Republicans, Do You Really Want Trump at Your Rally?
+Can You Still #Resist When Your State's on Fire?
+How Scientists Got Climate Change So Wrong
+Knowing Paris by Its Bridges
+Searching for the Ancestral Puebloans
+House-Sitting for Beginners
+Inside Adam Schiff's Impeachment Game Plan
+Abandoning Everything You Ever Believed, for Brexit. (Or Trump.)
+Poem 'Ghazal: Back Home'
+In Kevin Wilson's New Novel, Rageaholic Twins Spontaneously Combust
+New & Noteworthy, From Harold Bloom to the Women of Congress
+There Was No Second Shooter on the Grassy Knoll
+The Pep Effect
+N.F.L. Week 10 Predictions: Our Picks Against the Spread
+L.S.U. Survives Alabama's Second-Half Push for a Big Win
+Yoga Is Finally Facing Consent and Unwanted Touch
+Jennifer Lee, Queen of the 'Frozen' Franchise
+Life After Prison, on YouTube
+When It's Right, It's Right
+How to Say No During Wedding Season
+Rebecca Lansky, Miriam Scheiman
+A 3D Print-Out You Could Call Home
+Online Home Buying by Generation
+Can My Co-op Board Evict an Unruly Subletter?"
+
+# Aplicamos la funcion de limpieza a los datos obtenidos anteriormente:
+datos_limpios <- data.frame(Clean_String(datos2))
+
+# Nombramos la variable como "Word", para luego coincidir con el nombre durante el cruce de datos:
+names (datos_limpios)[1] = "Word"
+
+#Visualizamos los resultados:
+head(datos_limpios)
+```
+
+******
+## 05 - Importar diccionario emocional/sentimental
+******
+A continuación, importamos el diccionario emocional/sentimental de 2.470 palabras valoradas por la Universidad de Notre Dame donde las puntua del -5 al 5 según su efecto en el comportamiento humano.
+
+```{r,eval=TRUE,echo=TRUE}
+# Importamos el dateset del diccionario emociona/sentimental:
+diccionario_emocional<-read.xlsx("C:/Users/Usuari/Desktop/diccionario_emocional.xlsx", "data")
+
+# Visualizamos sus datos resumen:
+head(diccionario_emocional)
+summary(diccionario_emocional)
+```
+
+******
+## 06 - Inner Join de las palabras
+******
+Procesamos los datos obtenidos anteriormente realizando una inner join mediante las palabras. De este modo, obtendremos las puntuaciones emocionales/sentimentales de cada palabra que conforman el conjunto de titulares del diario NY TIMES durante el día 10/11/2019: 
+
+```{r,eval=TRUE,echo=TRUE}
+# Aplicamos la función "merge" para hacer el inner join:
+inner_join <-merge(x=datos_limpios,y=diccionario_emocional,by="Word")
+
+#Visualizamos los resultados resumen:
+head(inner_join)
+summary(inner_join)
+```
+
+******
+## 07 - Resultado final
+******
+Y finalmente, realizamos un sumatorio de todas las puntuaciones recibidas de las palabras que conforman los titulares de todas las noticias:
+
+```{r,eval=TRUE,echo=TRUE}
+# Aplicamos la función "sum" para sumar las puntuaciones:
+resultado_hoy <-sum(inner_join$Puntuacion)
+resultado_hoy
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
